@@ -46,7 +46,7 @@ jobs:
           mka recoveryimage
 
       - name: Upload Output Recovery Image
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: TWRP-Recovery-Moon
           path: ~/twrp/out/target/product/moon/recovery.img
