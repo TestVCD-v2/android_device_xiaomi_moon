@@ -1,0 +1,5 @@
+$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
+PRODUCT_NAME := twrp_moon
+PRODUCT_DEVICE := moon
+PRODUCT_BRAND := Xiaomi
+PRODUCT_MODEL := Redmi 13
