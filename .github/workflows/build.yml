@@ -1,0 +1,52 @@
+name: Build TWRP Recovery
+
+on:
+  workflow_dispatch: # Bisa di-klik manual dari tab Actions di GitHub
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository Device Tree
+        uses: actions/checkout@v3
+
+      - name: Maximize Build Space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 5120
+          swap-size-mb: 8192
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+
+      - name: Install Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y repo git wget curl python3
+
+      - name: Initialize Repo TWRP (OmniROM / Minimal Manifest)
+        run: |
+          mkdir -p ~/twrp && cd ~/twrp
+          repo init -u https://github.com/omnirom/android.git -b android-12.1 --depth=1
+          repo sync -j8 --force-sync
+
+      - name: Place Device Tree
+        run: |
+          # Pindahkan device tree buatanmu ke folder yang benar di source TWRP
+          mkdir -p ~/twrp/device/xiaomi/moon
+          cp -r $GITHUB_WORKSPACE/* ~/twrp/device/xiaomi/moon/
+
+      - name: Start Building Recovery
+        run: |
+          cd ~/twrp
+          source build/envsetup.sh
+          export ALLOW_MISSING_DEPENDENCIES=true
+          lunch omni_moon-eng  # Ganti sesuai codename & target di device tree mu
+          mka recoveryimage
+
+      - name: Upload Output Recovery Image
+        uses: actions/upload-artifact@v3
+        with:
+          name: TWRP-Recovery-Moon
+          path: ~/twrp/out/target/product/moon/recovery.img
